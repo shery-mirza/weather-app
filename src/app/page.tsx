@@ -55,7 +55,6 @@ const getWeatherIcon = (main: string, description: string, isNight: boolean) => 
   if (["mist", "fog", "haze"].includes(mainLower)) return <WiFog className="text-6xl text-gray-400" />;
   if (mainLower === "smoke") return <WiSmoke className="text-6xl text-gray-400" />;
   if (mainLower === "dust") return <WiDust className="text-6xl text-yellow-300" />;
-
   return <WiCloudy className="text-6xl text-gray-400" />;
 };
 
@@ -79,7 +78,7 @@ const fetchWeatherData = async (cityName: string) => {
             weather: [{ main: "Clear", description: "clear sky", icon: "01d" }],
           });
         } else {
-          reject(new Error("City not found or API unavailable."));
+          reject(new Error("City not found"));
         }
       }, 1500);
     });
