@@ -68,7 +68,6 @@ const fetchWeatherData = async (cityName: string) => {
     );
     return response.data;
   } catch (error) {
-    // Simulated fallback
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (Math.random() > 0.5) {
