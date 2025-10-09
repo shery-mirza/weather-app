@@ -1,103 +1,190 @@
-import Image from "next/image";
+"use client";
 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import {
+  WiDaySunny,
+  WiCloudy,
+  WiRain,
+  WiSnow,
+  WiThunderstorm,
+  WiFog,
+  WiNightClear,
+  WiDayCloudy,
+  WiRaindrops,
+  WiSmoke,
+  WiDust, 
+} from "react-icons/wi";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+
+const API_KEY = "e3a3007c80f1a8d5cc6347f061c1282a";
+
+// Weather Icons
+const getWeatherIcon = (main: string, description: string, isNight: boolean) => {
+  const condition = description.toLowerCase();
+  const mainLower = main.toLowerCase();
+
+  if (mainLower === "clear") {
+    return isNight ? (
+      <WiNightClear className="text-6xl text-yellow-300" />
+    ) : (
+      <WiDaySunny className="text-6xl text-yellow-400" />
+    );
+  }
+
+  if (mainLower === "clouds") {
+    return condition.includes("few") || condition.includes("scattered") ? (
+      <WiDayCloudy className="text-6xl text-gray-300" />
+    ) : (
+      <WiCloudy className="text-6xl text-gray-400" />
+    );
+  }
+
+  if (mainLower === "rain") {
+    return condition.includes("light") ? (
+      <WiRaindrops className="text-6xl text-blue-300" />
+    ) : (
+      <WiRain className="text-6xl text-blue-500" />
+    );
+  }
+
+  if (mainLower === "drizzle") return <WiRaindrops className="text-6xl text-blue-300" />;
+  if (mainLower === "snow") return <WiSnow className="text-6xl text-blue-200" />;
+  if (mainLower === "thunderstorm") return <WiThunderstorm className="text-6xl text-yellow-500" />;
+  if (["mist", "fog", "haze"].includes(mainLower)) return <WiFog className="text-6xl text-gray-400" />;
+  if (mainLower === "smoke") return <WiSmoke className="text-6xl text-gray-400" />;
+  if (mainLower === "dust") return <WiDust className="text-6xl text-yellow-300" />;
+
+  return <WiCloudy className="text-6xl text-gray-400" />;
+};
+
+// Data Fetch
+const fetchWeatherData = async (cityName: string) => {
+  if (!cityName) throw new Error("Please enter a city name.");
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`
+    );
+    return response.data;
+  } catch (error) {
+    // Simulated fallback
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (Math.random() > 0.5) {
+          resolve({
+            name: cityName,
+            main: { temp: 26 },
+            weather: [{ main: "Clear", description: "clear sky", icon: "01d" }],
+          });
+        } else {
+          reject(new Error("City not found or API unavailable."));
+        }
+      }, 1500);
+    });
+  }
+};
+
+// JSX Display
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [city, setCity] = useState("");
+  const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["weather", city],
+    queryFn: () => fetchWeatherData(city),
+    enabled: false,
+  });
+
+  const handleSearch = () => {
+    if (city.trim() !== "") {
+      setFeedback(null);
+      refetch();
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") handleSearch();
+  };
+
+  return (
+    <div className="w-full max-w-md p-6 bg-gradient-to-b from-sky-400 to-sky-600 rounded-2xl shadow-xl text-white mx-auto mt-10">
+      <h1 className="text-2xl font-bold text-center mb-6">Weather Finder</h1>
+
+      <div className="flex gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Enter city name..."
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="flex-1 p-3 rounded-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleSearch}
+          className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg font-semibold transition"
+        >
+          Search
+        </button>
+      </div>
+
+      {isLoading && (
+        <div className="flex justify-center py-6">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+
+      {isError && (
+        <div className="text-center text-red-200 font-medium mt-4">
+          {(error as Error).message}
+        </div>
+      )}
+
+      {data && !isError && !isLoading && (
+        <div className="text-center mt-6 space-y-3">
+          <h2 className="text-xl font-semibold">{data.name}</h2>
+
+          <div className="flex flex-col items-center space-y-1">
+            {getWeatherIcon(
+              data.weather[0].main,
+              data.weather[0].description,
+              data.weather[0].icon.includes("n")
+            )}
+            <p className="capitalize text-lg">{data.weather[0].description}</p>
+          </div>
+
+          <p className="text-3xl font-bold mt-2">
+            {Math.round(data.main.temp)}°C
+          </p>
+
+          {/* Feedback */}
+          <div className="flex justify-center items-center gap-6 mt-6">
+            <button
+              onClick={() => setFeedback("like")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                feedback === "like" ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
+              }`}
+            >
+              <FaThumbsUp /> Like
+            </button>
+            <button
+              onClick={() => setFeedback("dislike")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                feedback === "dislike" ? "bg-red-600" : "bg-red-500 hover:bg-red-600"
+              }`}
+            >
+              <FaThumbsDown /> Dislike
+            </button>
+          </div>
+
+          {feedback && (
+            <p className="text-sm text-white mt-2 italic">
+              You {feedback === "like" ? "liked" : "disliked"} this weather update.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
