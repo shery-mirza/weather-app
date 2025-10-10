@@ -14,7 +14,7 @@ import {
   WiDayCloudy,
   WiRaindrops,
   WiSmoke,
-  WiDust, 
+  WiDust,
 } from "react-icons/wi";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 
@@ -84,7 +84,7 @@ const fetchWeatherData = async (cityName: string) => {
   }
 };
 
-// JSX Display
+// JSX
 export default function Home() {
   const [city, setCity] = useState("");
   const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
@@ -107,82 +107,171 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full max-w-md p-6 bg-gradient-to-b from-sky-400 to-sky-600 rounded-2xl shadow-xl text-white mx-auto mt-10">
-      <h1 className="text-2xl font-bold text-center mb-6">Weather Finder</h1>
+    <>
+      {/* DESKTOP VERSION */}
+      <div className="hidden md:block">
+        <div className="w-full max-w-md p-6 bg-gradient-to-b from-sky-400 to-sky-600 rounded-2xl shadow-xl text-white mx-auto mt-10">
+          <h1 className="text-2xl font-bold text-center mb-6">Weather Finder</h1>
 
-      <div className="flex gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Enter city name..."
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 p-3 rounded-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg font-semibold transition"
-        >
-          Search
-        </button>
-      </div>
-
-      {isLoading && (
-        <div className="flex justify-center py-6">
-          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {isError && (
-        <div className="text-center text-red-200 font-medium mt-4">
-          {(error as Error).message}
-        </div>
-      )}
-
-      {data && !isError && !isLoading && (
-        <div className="text-center mt-6 space-y-3">
-          <h2 className="text-xl font-semibold">{data.name}</h2>
-
-          <div className="flex flex-col items-center space-y-1">
-            {getWeatherIcon(
-              data.weather[0].main,
-              data.weather[0].description,
-              data.weather[0].icon.includes("n")
-            )}
-            <p className="capitalize text-lg">{data.weather[0].description}</p>
-          </div>
-
-          <p className="text-3xl font-bold mt-2">
-            {Math.round(data.main.temp)}°C
-          </p>
-
-          {/* Feedback */}
-          <div className="flex justify-center items-center gap-6 mt-6">
+          <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Enter city name..."
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 p-3 rounded-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             <button
-              onClick={() => setFeedback("like")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                feedback === "like" ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
-              }`}
+              onClick={handleSearch}
+              className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg font-semibold transition"
             >
-              <FaThumbsUp /> Like
-            </button>
-            <button
-              onClick={() => setFeedback("dislike")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-                feedback === "dislike" ? "bg-red-600" : "bg-red-500 hover:bg-red-600"
-              }`}
-            >
-              <FaThumbsDown /> Dislike
+              Search
             </button>
           </div>
 
-          {feedback && (
-            <p className="text-sm text-white mt-2 italic">
-              You {feedback === "like" ? "liked" : "disliked"} this weather update.
-            </p>
+          {isLoading && (
+            <div className="flex justify-center py-6">
+              <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {isError && (
+            <div className="text-center text-red-200 font-medium mt-4">
+              {(error as Error).message}
+            </div>
+          )}
+
+          {data && !isError && !isLoading && (
+            <div className="text-center mt-6 space-y-3">
+              <h2 className="text-xl font-semibold">{data.name}</h2>
+
+              <div className="flex flex-col items-center space-y-1">
+                {getWeatherIcon(
+                  data.weather[0].main,
+                  data.weather[0].description,
+                  data.weather[0].icon.includes("n")
+                )}
+                <p className="capitalize text-lg">{data.weather[0].description}</p>
+              </div>
+
+              <p className="text-3xl font-bold mt-2">{Math.round(data.main.temp)}°C</p>
+
+              <div className="flex justify-center items-center gap-6 mt-6">
+                <button
+                  onClick={() => setFeedback("like")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    feedback === "like"
+                      ? "bg-green-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                >
+                  <FaThumbsUp /> Like
+                </button>
+                <button
+                  onClick={() => setFeedback("dislike")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    feedback === "dislike"
+                      ? "bg-red-600"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
+                >
+                  <FaThumbsDown /> Dislike
+                </button>
+              </div>
+
+              {feedback && (
+                <p className="text-sm text-white mt-2 italic">
+                  You {feedback === "like" ? "liked" : "disliked"} this weather
+                  update.
+                </p>
+              )}
+            </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* MOBILE VERSION */}
+      <div className="block md:hidden">
+        <div className="w-full max-w-full mx-auto mt-6 p-4 bg-gradient-to-b from-sky-400 to-sky-600 rounded-2xl shadow-xl text-white">
+          <h1 className="text-xl font-bold text-center mb-4">Weather Finder</h1>
+
+          <div className="flex flex-col gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Enter city name..."
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 p-3 rounded-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleSearch}
+              className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg font-semibold transition"
+            >
+              Search
+            </button>
+          </div>
+
+          {isLoading && (
+            <div className="flex justify-center py-4">
+              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {isError && (
+            <div className="text-center text-red-200 font-medium mt-4 text-sm">
+              {(error as Error).message}
+            </div>
+          )}
+
+          {data && !isError && !isLoading && (
+            <div className="text-center mt-6 space-y-3">
+              <h2 className="text-lg font-semibold">{data.name}</h2>
+
+              <div className="flex flex-col items-center space-y-1">
+                {getWeatherIcon(
+                  data.weather[0].main,
+                  data.weather[0].description,
+                  data.weather[0].icon.includes("n")
+                )}
+                <p className="capitalize text-base">{data.weather[0].description}</p>
+              </div>
+
+              <p className="text-2xl font-bold mt-2">{Math.round(data.main.temp)}°C</p>
+
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <button
+                  onClick={() => setFeedback("like")}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                    feedback === "like"
+                      ? "bg-green-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                >
+                  <FaThumbsUp /> Like
+                </button>
+                <button
+                  onClick={() => setFeedback("dislike")}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                    feedback === "dislike"
+                      ? "bg-red-600"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
+                >
+                  <FaThumbsDown /> Dislike
+                </button>
+              </div>
+
+              {feedback && (
+                <p className="text-xs text-white mt-2 italic">
+                  You {feedback === "like" ? "liked" : "disliked"} this weather update.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
